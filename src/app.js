@@ -32,7 +32,35 @@ class App extends Component {
 
     this.setState({
       imgs: data.images,
-      index: 0
+      index: 0,
+      windowSize: this.getWindowSize()
+    });
+
+    window.addEventListener(
+      'resize',
+      this.handleResize.bind(this)
+    );
+  }
+
+  getWindowSize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight
+    return {
+      width,
+      height,
+      ratio: width / height
+    }
+  }
+
+  handleResize() {
+
+    TweenLite.killTweensOf(this.animation);
+
+    const windowSize = this.getWindowSize();
+    this.animation.x = -this.state.index*windowSize.width;
+
+    this.setState({
+      windowSize
     });
   }
 
@@ -54,7 +82,7 @@ class App extends Component {
     })
   }
 
-  renderImages(imgs) {
+  renderImages(imgs, windowSize) {
 
     const animationIndex = Math.floor(Math.abs(this.animation.x) / window.innerWidth);
     const animating = Boolean(this.animation.x%window.innerWidth);
@@ -63,14 +91,14 @@ class App extends Component {
       const renderImage = i === animationIndex || (animating && i === animationIndex + 1);
 
       if(renderImage) {
-        
+
         const x = this.animation.x + window.innerWidth*i;
         const image = (
           <Image
             key={i}
             path={img.imagePath}
             x={x}
-            active={true}
+            windowSize={windowSize}
           />
         );
         images.push(image);
@@ -97,10 +125,11 @@ class App extends Component {
 
     const {
       imgs,
-      index
+      index,
+      windowSize
     } = this.state;
 
-    const images = this.renderImages(imgs);
+    const images = this.renderImages(imgs, windowSize);
     const thumbs = this.renderThumbs(imgs, index);
 
     return (

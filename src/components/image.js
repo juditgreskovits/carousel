@@ -26,11 +26,16 @@ const StyledLoader = styled.img`
 class Image extends Component {
 
   componentWillMount() {
-    
+
     this.setState({
-      windowSize: null,
       imageRect: null
     })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if(this.props.windowSize !== nextProps.windowSize) {
+      this.sizeAndPositionImage();
+    }
   }
 
   handleLoad(evt) {
@@ -46,19 +51,13 @@ class Image extends Component {
     }
 
     this.setState({
-      imageSize,
-      windowSize: this.getWindowSize()
+      imageSize
     }, () => this.sizeAndPositionImage());
-
-    window.addEventListener(
-      'resize',
-      this.sizeAndPositionImage.bind(this)
-    );
   }
 
   sizeAndPositionImage() {
 
-    const windowSize = this.getWindowSize();
+    const windowSize = this.props.windowSize;
     const imageSize = this.state.imageSize;
 
     let width = windowSize.width, height = windowSize.height;
@@ -73,8 +72,8 @@ class Image extends Component {
       y = (windowSize.height - height)/2;
     }
 
+    // store imageRect on state so that it's not recalculated on each render
     this.setState({
-      windowSize: windowSize,
       imageRect: {
         x,
         y,
@@ -98,11 +97,11 @@ class Image extends Component {
 
     const {
       path,
-      x
+      x,
+      windowSize
     } = this.props;
 
     const {
-      windowSize,
       imageRect
     } = this.state;
 
@@ -118,7 +117,12 @@ class Image extends Component {
 
 Image.propTypes = {
   path: PropTypes.string,
-  x: PropTypes.number
+  x: PropTypes.number,
+  windowSize: PropTypes.shape({
+    width: PropTypes.number,
+    height: PropTypes.number,
+    ratio: PropTypes.number
+  })
 }
 
 export default Image;
